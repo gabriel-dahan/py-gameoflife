@@ -39,6 +39,7 @@ class GameOfLife:
             self.matrix = np.zeros(self.shape, dtype = bool)
         self.alive_char = alive_char
         self.dead_char = dead_char
+        self.dynamic = dynamic
 
     def _clear_shell(self) -> None:
         if os.name == 'nt':
@@ -46,19 +47,25 @@ class GameOfLife:
         else:
             _ = os.system('clear')
 
-    def _rand_name(self, length):
+    def _rand_name(self, length) -> str:
         abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
         random_name = ''.join(random.sample(abc, length))
         return random_name
 
-    def _reload_shape(self):
+    def _reload_shape(self) -> None:
         self.shape = self.matrix.shape
     
-    def _update_grid(self):
+    def _update_grid(self) -> None:
         """ Update the shape of the grid when a living cell come close to a border. """
+        if not self.dynamic:
+            return
+        borders = self.get_line(1) + self.get_line(self.shape[0] - 2) \
+            + self.get_column(1) + self.get_column(self.shape[1] - 2)
+        if any(borders):
+            self.matrix = np.pad(self.matrix, pad_width = 1, mode = 'constant', constant_values = 0)
         self._reload_shape()
 
-    def get_matrix(self): return self.matrix
+    def get_matrix(self) -> np.array: return self.matrix
 
     def get_cell(self, coords: Tuple[int]) -> Union[int, None]:
         x, y = coords
@@ -69,7 +76,7 @@ class GameOfLife:
             return None
 
     def get_line(self, line: int) -> List[bool]:
-        return self.matrix[line]
+        return list(self.matrix[line])
     
     def get_column(self, column: int) -> List[bool]:
         return [self.matrix[i][column] for i in range(len(self.matrix))]
@@ -86,6 +93,7 @@ class GameOfLife:
             neigh == 3, 
             np.logical_and(int_matrix == 1, neigh == 2)
         )
+        self._update_grid()
 
     def edit_state(self, cell: Tuple[int], state: bool):
         x, y = cell
@@ -142,5 +150,5 @@ class GameOfLife:
         return self.__repr__()
         
 if __name__ == '__main__':
-    gol = GameOfLife(config = 'pulsar.gol')
+    gol = GameOfLife(config = 'spaceship.gol')
     gol.run()
