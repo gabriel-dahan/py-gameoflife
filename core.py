@@ -23,28 +23,20 @@ import random
 import numpy as np
 from typing import List, Tuple, Union
 import json
-
-class Cell:
-    
-    def __init__(self, coords: Tuple[int], alive: bool = False):
-        self.coords = coords
-        self.alive = alive
-
-    def get_coords(self) -> Tuple[int]: return self.coords
-
-    def is_alive(self) -> bool: return self.alive 
-
-    def __repr__(self) -> str:
-        return f'Cell(coord: {self.coords}, alive: {self.alive})'
-
-    def __str__(self) -> str:
-        return self.__repr__()
+from pathlib import Path
 
 class GameOfLife:
     
-    def __init__(self, height: int, width: int, alive_char: str = '#', dead_char: str = '-') -> None:
-        self.size = (height, width,)
-        self.matrix = np.zeros(self.size, dtype = bool)
+    def __init__(self, height: int = None, width: int = None, config: Union[str, Path] = None, alive_char: str = '#', dead_char: str = '-', dynamic: bool = True) -> None:
+        assert (height and width) or config, 'You must provide grid dimensions or a configuration file.'
+        self.width = width
+        self.shape = (height, width,)
+        if config:
+            if isinstance(config, str):
+                config = Path(config)
+            self.load_conf(config)
+        else:
+            self.matrix = np.zeros(self.shape, dtype = bool)
         self.alive_char = alive_char
         self.dead_char = dead_char
 
@@ -59,13 +51,20 @@ class GameOfLife:
         random_name = ''.join(random.sample(abc, length))
         return random_name
 
+    def _reload_shape(self):
+        self.shape = self.matrix.shape
+    
+    def _update_grid(self):
+        """ Update the shape of the grid when a living cell come close to a border. """
+        self._reload_shape()
+
     def get_matrix(self): return self.matrix
 
-    def get_cell(self, coords: Tuple[int]) -> Union[Cell, None]:
+    def get_cell(self, coords: Tuple[int]) -> Union[int, None]:
         x, y = coords
         try:
-            alive = self.matrix[x][y]
-            return Cell(coords, alive)
+            self.matrix[x][y]
+            return coords
         except IndexError:
             return None
 
@@ -79,8 +78,8 @@ class GameOfLife:
         int_matrix = self.matrix.astype(int)
         neigh = np.zeros(int_matrix.shape)
         neigh[1:-1, 1:-1] = (
-            int_matrix[:-2, :-2]  + int_matrix[:-2, 1:-1] + int_matrix[:-2, 2:] + 
-            int_matrix[1:-1, :-2] +                         int_matrix[1:-1, 2:]  + 
+            int_matrix[:-2, :-2]  + int_matrix[:-2, 1:-1] + int_matrix[:-2, 2:]  + 
+            int_matrix[1:-1, :-2] +                         int_matrix[1:-1, 2:] + 
             int_matrix[2:, :-2]   + int_matrix[2:, 1:-1]  + int_matrix[2:, 2:]
         )
         self.matrix = np.logical_or(
@@ -88,9 +87,7 @@ class GameOfLife:
             np.logical_and(int_matrix == 1, neigh == 2)
         )
 
-    def edit_state(self, cell: Union[Tuple[int], Cell], state: bool):
-        if isinstance(cell, Cell):
-            cell = cell.get_coords()
+    def edit_state(self, cell: Tuple[int], state: bool):
         x, y = cell
         self.matrix[x][y] = state
 
@@ -99,7 +96,7 @@ class GameOfLife:
         string = ''
         for line in temp:
             for cell in line:
-                string += self.alive_char if cell else self.dead_char
+                string += f'{self.alive_char} ' if cell else f'{self.dead_char} '
             string += '\n'
         return string
 
@@ -124,33 +121,26 @@ class GameOfLife:
     def graphic_run(self):
         pass
 
-    def new_conf(self, name: str = None) -> None:
+    def new_conf(self, path: Path = None) -> None:
         """ Generates a file to simplify default alive cells configuration. """
-        if not name:
-            name = self._rand_name(10)
-        with open(f'{name}.gol', 'w') as f:
+        if not path:
+            path = Path(f'./{self._rand_name(10)}.gol')
+        with open(path.absolute(), 'w') as f:
             f.writelines([str(list(self.matrix.astype(int)[i])) + '\n' for i in range(len(self.matrix))])
 
-    def load_conf(self, name: str):
+    def load_conf(self, path: Path) -> None:
         """ Loads a file containing the default configuration. """
-        with open(f'{name}.gol') as f:
+        with open(path.absolute()) as f:
             conf = [json.loads(line) for line in f.readlines()]
         self.matrix = np.asarray(conf)
+        self._reload_shape()
 
     def __repr__(self) -> str:
-        return f'({self.size} array) : \n{self.matrix.astype(int)}'
+        return f'({self.shape} array) : \n{self.matrix.astype(int)}'
 
     def __str__(self) -> str:
         return self.__repr__()
         
 if __name__ == '__main__':
-    gol = GameOfLife(30, 100)
-
-    # gol.edit_state((15, 50), True)
-    # gol.edit_state((14, 50), True)
-    # gol.edit_state((16, 50), True)
-    # gol.edit_state((15, 49), True)
-    # gol.edit_state((14, 51), True)
-
-    gol.load_conf('myconf')
+    gol = GameOfLife(config = 'pulsar.gol')
     gol.run()
