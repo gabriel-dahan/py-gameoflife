@@ -24,6 +24,7 @@ import numpy as np
 from typing import List, Tuple, Union
 import json
 from pathlib import Path
+import cv2
 
 class GameOfLife:
     
@@ -42,15 +43,11 @@ class GameOfLife:
         self.dynamic = dynamic
 
     def _clear_shell(self) -> None:
-        if os.name == 'nt':
-            _ = os.system('cls')
-        else:
-            _ = os.system('clear')
+        _ = os.system('cls') if os.name == 'nt' else os.system('clear')
 
     def _rand_name(self, length) -> str:
         abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        random_name = ''.join(random.sample(abc, length))
-        return random_name
+        return ''.join(random.sample(abc, length))
 
     def _reload_shape(self) -> None:
         self.shape = self.matrix.shape
@@ -59,13 +56,24 @@ class GameOfLife:
         """ Update the shape of the grid when a living cell come close to a border. """
         if not self.dynamic:
             return
-        borders = self.get_line(1) + self.get_line(self.shape[0] - 2) \
-            + self.get_column(1) + self.get_column(self.shape[1] - 2)
-        if any(borders):
-            self.matrix = np.pad(self.matrix, pad_width = 1, mode = 'constant', constant_values = 0)
+        top_left_borders = [self.get_line(1), self.get_column(1)]
+        bottom_right_borders = [self.get_line(self.shape[0] - 2), self.get_column(self.shape[1] - 2)]
+        borders = [top_left_borders, bottom_right_borders]
+        # y = 0 --> line
+        # y = 1 --> column
+        # i = 0 --> top-left borders
+        # i = 1 --> bottom-right borders
+        for i in range(2):
+            for y, border in enumerate(borders[i]):
+                shape = self.shape[0] if y == 1 else self.shape[1]
+                if not any(border):
+                    print('Not any')
+                    continue
+                print('Accessed')
+                self.matrix = np.insert(self.matrix, self.shape[1] if i == 1 else i, np.zeros(shape, dtype = bool), axis = None if y == 0 else y)
         self._reload_shape()
 
-    def get_matrix(self) -> np.array: return self.matrix
+    def get_matrix(self) -> np.array: return self.matrix 
 
     def get_cell(self, coords: Tuple[int]) -> Union[int, None]:
         x, y = coords
@@ -120,6 +128,7 @@ class GameOfLife:
                 self.next_gen()
                 print(f'\n\nGeneration [{i}]')
                 print(self.view())
+                print(self.shape)
                 time.sleep(wait_time)
                 i += 1
             except KeyboardInterrupt:
@@ -128,7 +137,7 @@ class GameOfLife:
 
     def graphic_run(self):
         pass
-
+                        
     def new_conf(self, path: Path = None) -> None:
         """ Generates a file to simplify default alive cells configuration. """
         if not path:
@@ -138,6 +147,7 @@ class GameOfLife:
 
     def load_conf(self, path: Path) -> None:
         """ Loads a file containing the default configuration. """
+        assert path.exists(), f'File \'{path.name}\' doesn\'t exist.'
         with open(path.absolute()) as f:
             conf = [json.loads(line) for line in f.readlines()]
         self.matrix = np.asarray(conf)
@@ -151,4 +161,4 @@ class GameOfLife:
         
 if __name__ == '__main__':
     gol = GameOfLife(config = 'spaceship.gol')
-    gol.run()
+    gol.run(wait_time = 0.005)
