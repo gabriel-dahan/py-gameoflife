@@ -21,7 +21,7 @@ The rules continue to be applied repeatedly to create further generations.
 import os
 import random
 import numpy as np
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple, Union
 import json
 from pathlib import Path
 
@@ -177,10 +177,10 @@ class GameOfLife:
         return self.__repr__()
 
 if __name__ == '__main__':
-    #gol = GameOfLife(config = 'configs/glider.gol', custom_config = {
+    #gol = GameOfLife(config = 'configs/blinker.gol', custom_config = {
     #    1: '#',
     #    0: '-'
     #}, graphic = True)
     gol = GameOfLife(config = '__random__', width = 75, height = 75, graphic = True)
-    gol.run(wait_time = 0.05)
+    gol.run(wait_time = 0.1)
     

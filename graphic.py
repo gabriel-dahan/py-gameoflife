@@ -1,10 +1,5 @@
-"""
-This example demonstrates ViewBox and AxisItem configuration to plot a correlation matrix.
-"""
-
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtWidgets
-from pyqtgraph.Qt import QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 
 class GraphicGOL(QtWidgets.QMainWindow):
 
