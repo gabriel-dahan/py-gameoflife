@@ -177,10 +177,15 @@ class GameOfLife:
         return self.__repr__()
 
 if __name__ == '__main__':
-    #gol = GameOfLife(config = 'configs/blinker.gol', custom_config = {
+    #gol = GameOfLife(config = 'configs/pulsar.gol', custom_config = {
     #    1: '#',
     #    0: '-'
     #}, graphic = True)
-    gol = GameOfLife(config = '__random__', width = 75, height = 75, graphic = True)
-    gol.run(wait_time = 0.1)
+    ##gol = GameOfLife(config = '__random__', width = 75, height = 75, graphic = True)
+    ##gol.run()
+    gol = GameOfLife(height = 6, width = 10) # Creates a 10x10 grid.
+    gol.edit_state((3, 5), True)
+    gol.edit_state((2, 5), True)
+    gol.edit_state((1, 5), True)
+    print(gol.view())
     
