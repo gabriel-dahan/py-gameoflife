@@ -9,7 +9,7 @@ gol.edit_state((2, 5), True)
 gol.edit_state((1, 5), True)
 print(gol.view())
 ```
-*Result* : 
+*Résultat* : 
 ```
 - - - - - - - - - -
 - - - - - # - - - -
@@ -55,7 +55,7 @@ gol = GameOfLife(config = 'configs/glidergun.gol', custom_config = {
 ```
 **Attention : cela ne change pas l'apparence des cellules dans la console !** Vous devez utiliser les arguments de classe `alive_char` et `dead_char` pour cela.
 ## Initialisation aléatoire
-Si jamais vous voulez lancer une simulation avec une grille aléatoire, vous pouvez utiliser la valeur spécial `__random__` pour l'argument `config` :
+Si jamais vous voulez lancer une simulation avec une grille aléatoire, vous pouvez utiliser la valeur spéciale `__random__` pour l'argument `config` :
 ```python
 gol = GameOfLife(config = '__random__', height = 30, width = 20)
 ```
