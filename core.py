@@ -136,7 +136,7 @@ class GameOfLife:
 
         mkQApp("Game Of Life matrix display")
         graph = GraphicGOL(self)
-        graph.run(wait_time)
+        graph.run(int(wait_time * 1000))
 
     def run(self, wait_time: float = 0.1) -> None:
         """ Run the basic simulation. """
@@ -181,6 +181,7 @@ if __name__ == '__main__':
     #     1: '#',
     #     0: '-'
     # }, graphic = True)
+    # gol.run()
     ## gol = GameOfLife(config = '__random__', width = 75, height = 75, graphic = True)
     ## gol.run()
     #- gol = GameOfLife(height = 6, width = 10) # Creates a 10x10 grid.
@@ -188,4 +189,4 @@ if __name__ == '__main__':
     #- gol.edit_state((2, 5), True)
     #- gol.edit_state((1, 5), True)
     #- print(gol.view())
-    pass
+    ...

@@ -30,7 +30,7 @@ class GraphicGOL(QtWidgets.QMainWindow):
             self.__matrix.setImage(self.__gol.get_matrix())
         timer = QtCore.QTimer()
         timer.timeout.connect(to_run)
-        timer.start(wait_time * 1000)
+        timer.start(wait_time)
         pg.exec()
         
         
